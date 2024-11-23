@@ -11,6 +11,7 @@ const {
 const upload = require("../../middlewares/uploadFile");
 const deleteFile = require("../../middlewares/deleteFile");
 const { SubCategory } = require("../../models");
+const optimizeImage = require('../../middlewares/optimizeImage')
 
 const router = express.Router();
 

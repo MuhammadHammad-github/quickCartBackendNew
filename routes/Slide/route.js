@@ -2,6 +2,8 @@ const express = require("express");
 const verifyAuthToken = require("../../middlewares/verifyAuthToken");
 const upload = require("../../middlewares/uploadFile");
 const deleteFile = require("../../middlewares/deleteFile");
+const optimizeImage = require("../../middlewares/optimizeImage");
+
 const apicache = require("apicache");
 const cache = apicache.middleware;
 const {
