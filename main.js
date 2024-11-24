@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const httpProxy = require('http-proxy');
 const { connectToDb } = require("./utils");
 const {
   adminRoute,
@@ -15,6 +16,12 @@ const {
 } = require("./routes");
 const app = express();
 
+const proxy = httpProxy.createProxyServer();
+const servers = [
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'http://localhost:3003'
+];
 connectToDb();
 
 app.use(cors());
