@@ -104,7 +104,6 @@ const updateProduct = async (req, res) => {
   const protocol = forwardedProto.split(',')[0].trim() || req.protocol;
   const fullUrl = protocol + "://" + req.get("host");
   const files = req.files;
-  console.log("these are files", files);
   let query;
   if (!files || files.length === 0)
     return response(res, 404, { message: "File Not Uploaded!" });
