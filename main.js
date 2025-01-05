@@ -20,6 +20,10 @@ connectToDb();
 
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", (req, res, next) => {
+  res.setHeader("Cache-Control", "public, max-age=31536000"); // Cache for 1 year
+  next();
+});
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/admin", adminRoute);
