@@ -43,14 +43,14 @@ const conditionalDelete = (Model) => {
 };
 
 router.get("/", getProduct);
-router.get("/all", cache("5 minutes"), getProducts);
+router.get("/all",  getProducts);
 router.get("/totalProducts", getTotalProducts);
 router.get("/totalProductsByRetailer", getTotalProductsByRetailer);
-router.get("/retailerProducts", cache("5 minutes"), getProductsByRetailer);
+router.get("/retailerProducts",  getProductsByRetailer);
 router.get("/byCategory", getProductsByCategory);
 router.get("/bySubCategory", getProductsBySubCategory);
-router.get("/featured", cache("5 minutes"), getFeaturedProducts);
-router.get("/popular", cache("5 minutes"), getPopularProducts);
+router.get("/featured",  getFeaturedProducts);
+router.get("/popular",  getPopularProducts);
 router.post(
   "/create",
   verifyAuthToken,
