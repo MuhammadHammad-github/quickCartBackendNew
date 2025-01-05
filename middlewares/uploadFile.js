@@ -22,10 +22,13 @@ const upload = multer({
 
 // Check file type
 function checkFileType(file, cb) {
-  const filetypes = /jpeg|jpg|png|gif/;
+  console.log(file)
+  const filetypes = /jpeg|jpg|png|gif|webp/;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = filetypes.test(file.mimetype);
-
+  console.log(mimetype)
+  console.log(extname)
+  
   if (mimetype && extname) {
     return cb(null, true);
   } else {
