@@ -14,18 +14,16 @@ const {
 const { readTotal } = require("../utils/crud");
 
 const createProduct = async (req, res) => {
-  const forwardedProto = req.get('X-Forwarded-Proto');
-  const protocol = forwardedProto.split(',')[0].trim() || req.protocol;
+  const forwardedProto = req.get("X-Forwarded-Proto") || "";
+  const protocol = forwardedProto.split(",")[0]?.trim() || req.protocol;
   const fullUrl = protocol + "://" + req.get("host");
-  console.log(req.protocol, req.get("X-Forwarded-Proto"));
-  const files = req.files;
-  console.log(files);
-  if (!files || files.length === 0)
+  const optimizedFilePaths = req.optimizedImagePaths;
+  if (!optimizedFilePaths || optimizedFilePaths.length === 0)
     return response(res, 404, { message: "File Not Uploaded!" });
-  const filePaths = files.map((file) => {
-    return `${fullUrl}/${file.path.replace(/\\/g, "/")}`;
+  const filePaths = optimizedFilePaths.map((file) => {
+    return `${fullUrl}/${file.replace(/\\/g, "/")}`;
   });
-  console.log(req.body.colors);
+
   const product = await create(
     res,
     {
@@ -100,62 +98,74 @@ const getProductsBySubCategory = async (req, res) => {
   ]);
 };
 const updateProduct = async (req, res) => {
-  const forwardedProto = req.get('X-Forwarded-Proto');
-  const protocol = forwardedProto.split(',')[0].trim() || req.protocol;
-  const fullUrl = protocol + "://" + req.get("host");
-  const files = req.files;
-  let query;
-  if (!files || files.length === 0)
-    return response(res, 404, { message: "File Not Uploaded!" });
-  const filePaths = files.map((file) => {
-    if (file.path.startsWith(fullUrl))
-      return `${file.path.replace(/\\/g, "/")}`;
-    else return `${fullUrl}/${file.path.replace(/\\/g, "/")}`;
-  });
-  query = {
-    ...req.body,
-    colors: req.body.colors?.split(",") || [],
-    images: filePaths,
-  };
-  const product = await update(res, query, Product, req.headers["id"], false);
-  if (req.body.category) {
-    await pullUpdate(
-      res,
-      product._id,
-      Category,
-      product.category,
-      "products",
-      false
-    );
-    const resp = await pushUpdate(
-      res,
-      product._id,
-      Category,
-      product.category,
-      "products",
-      false
-    );
+  try {
+    const forwardedProto = req.get("X-Forwarded-Proto") || "";
+    const protocol = forwardedProto.split(",")[0]?.trim() || req.protocol;
+    const fullUrl = protocol + "://" + req.get("host");
+    const files = req.files;
+    const optimizedFilePaths = req.optimizedImagePaths || [];
+    const filePaths = optimizedFilePaths.map((file) => {
+      return `${fullUrl}/${file.replace(/\\/g, "/")}`;
+    });
+
+    // Proceed with the rest of the query
+    const query = {
+      ...req.body,
+      colors: req.body.colors?.split(",") || [],
+      ...(filePaths.length !== 0 && { images: filePaths }),
+    };
+    let productBeforeUpdate;
+    if (req.body.category || req.body.subCategory)
+      productBeforeUpdate = await Product.findById(req.headers["id"]).select(
+        "category subCategory"
+      );
+    const product = await update(res, query, Product, req.headers["id"], false);
+
+    if (req.body.category) {
+      await pullUpdate(
+        res,
+        product._id,
+        Category,
+        productBeforeUpdate.category,
+        "products",
+        false
+      );
+      await pushUpdate(
+        res,
+        product._id,
+        Category,
+        product.category,
+        "products",
+        false
+      );
+    }
+
+    if (req.body.subCategory) {
+      await pullUpdate(
+        res,
+        product._id,
+        SubCategory,
+        productBeforeUpdate.subCategory,
+        "products",
+        false
+      );
+      await pushUpdate(
+        res,
+        product._id,
+        SubCategory,
+        product.subCategory,
+        "products",
+        false
+      );
+    }
+
+    return response(res, 200, { message: "Data Updated!", product });
+  } catch (error) {
+    console.error("Error in updateProduct:", error);
+    return response(res, 500, { message: "Internal Server Error", error });
   }
-  if (req.body.subCategory) {
-    await pullUpdate(
-      res,
-      product._id,
-      SubCategory,
-      product.subCategory,
-      "products",
-      false
-    );
-    await pushUpdate(
-      res,
-      product._id,
-      SubCategory,
-      product.subCategory,
-      "products",
-      false
-    );
-  }
-  return response(res, 200, { message: "Data Updated!", product });
 };
+
 const featureUnFeatureProduct = async (req, res) => {
   try {
     const productId = req.headers["id"];

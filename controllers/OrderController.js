@@ -25,7 +25,6 @@ const createOrder = async (req, res) => {
       Order,
       false
     );
-    console.log("working until pushing in products");
     await Promise.all(
       products.map((productObj) => {
         pushUpdate(
@@ -103,7 +102,6 @@ const createCheckoutSession = async (req, res) => {
 };
 const getCheckoutSession = async (req, res) => {
   const { sessionId } = req.params;
-  console.log(sessionId);
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ["line_items"],

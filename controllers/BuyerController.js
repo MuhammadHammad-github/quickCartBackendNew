@@ -19,7 +19,6 @@ const getTotalBuyers = async (req, res) => {
   await readTotal(res, Buyer);
 };
 const updateBuyer = async (req, res) => {
-  console.log(req.body);
   await update(res, req.body, Buyer, req.id);
 };
 

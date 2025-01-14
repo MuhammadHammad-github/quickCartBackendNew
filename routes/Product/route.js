@@ -15,11 +15,16 @@ const {
   getFeaturedProducts,
   getPopularProducts,
 } = require("../../controllers/ProductController");
-const upload = require("../../middlewares/uploadFile");
+// const upload = require("../../middlewares/uploadFile");
 const deleteFile = require("../../middlewares/deleteFile");
 const { Product } = require("../../models");
 const apicache = require("apicache");
-const optimizeImage = require("../../middlewares/optimizeImage");
+// const optimizeImage = require("../../middlewares/optimizeImage");
+const {
+  upload,
+  optimizeImage,
+} = require("../../middlewares/optimizeAndUpload");
+const { mappingPaths } = require("../../utils/deleteFileFn");
 const cache = apicache.middleware;
 const router = express.Router();
 
@@ -34,8 +39,13 @@ const conditionalDelete = (Model) => {
   return (req, res, next) => {
     const contentType = req.headers["content-type"];
 
-    if (contentType && contentType.startsWith("multipart/form-data")) {
-      return deleteFile(Model)(req, res, next);
+    if (
+      contentType &&
+      contentType.startsWith("multipart/form-data") &&
+      req.body.imagesToDelete
+    ) {
+      // return deleteFile(Model)(req, res, next);
+      mappingPaths(req.body.imagesToDelete, req, res);
     }
 
     next();
@@ -43,14 +53,14 @@ const conditionalDelete = (Model) => {
 };
 
 router.get("/", getProduct);
-router.get("/all",  getProducts);
+router.get("/all", getProducts);
 router.get("/totalProducts", getTotalProducts);
 router.get("/totalProductsByRetailer", getTotalProductsByRetailer);
-router.get("/retailerProducts",  getProductsByRetailer);
+router.get("/retailerProducts", getProductsByRetailer);
 router.get("/byCategory", getProductsByCategory);
 router.get("/bySubCategory", getProductsBySubCategory);
-router.get("/featured",  getFeaturedProducts);
-router.get("/popular",  getPopularProducts);
+router.get("/featured", getFeaturedProducts);
+router.get("/popular", getPopularProducts);
 router.post(
   "/create",
   verifyAuthToken,
@@ -61,6 +71,7 @@ router.post(
 router.put(
   "/update",
   verifyAuthToken,
+
   conditionalUpload,
   optimizeImage,
   conditionalDelete(Product),

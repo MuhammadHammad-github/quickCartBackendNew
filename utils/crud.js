@@ -3,9 +3,7 @@ const tryCatchError = require("./tryCatchError");
 const { mappingPaths } = require("./deleteFileFn");
 const create = async (res, data, model, directReturn = true) => {
   try {
-    console.log(data);
     const newItem = await model.create(data);
-    console.log("this is new Item", newItem);
     if (directReturn)
       return response(res, 200, { message: "Created Successfully!" });
     else return newItem;
@@ -72,7 +70,7 @@ const update = async (res, data, model, id, directReturn = true) => {
   try {
     if (!id) return response(res, 409, { message: "Id not received" });
 
-    const item = await model.findById(id);
+    const item = await model.findById(id).select("_id");
     if (!item) return response(res, 404, { message: "Item not found" });
 
     const updateQuery = data.comment
@@ -115,8 +113,7 @@ const pushUpdate = async (
           status: 409,
         };
     }
-    const item = await model.findById(id);
-    console.log(item);
+    const item = await model.findById(id).select("_id");
     if (!item) {
       if (directReturn)
         return response(res, 404, { message: "Item not found" });
@@ -148,8 +145,7 @@ const pullUpdate = async (
         return response(res, 409, { message: "Id not received" });
       else return { message: "Id not received", status: 409, success: false };
 
-    const item = await model.findById(id);
-
+    const item = await model.findById(id).select("_id");
     if (!item)
       if (directReturn)
         return response(res, 404, { message: "Item not found" });
@@ -173,7 +169,7 @@ const deleteItem = async (res, data, model, directReturn = true) => {
     const { id } = data;
     if (!id) return response(res, 409, { message: "Id not received" });
 
-    const item = await model.findById(id);
+    const item = await model.findById(id).select("_id");
     if (!item) return response(res, 404, { message: "Item not found" });
     await model.findByIdAndDelete(id);
     if (directReturn) return response(res, 200, { message: "Item Deleted!" });
@@ -187,7 +183,7 @@ const deleteManyItems = async (res, data, model, directReturn = true) => {
     const { id, deleteBy } = data;
     if (!id) return response(res, 409, { message: "Id not received" });
 
-    const item = await model.deleteMany({ [deleteBy]: id });
+    await model.deleteMany({ [deleteBy]: id });
     if (directReturn) return response(res, 200, { message: "Items Deleted!" });
     else return;
   } catch (error) {
@@ -203,9 +199,7 @@ const deletingImages = async (
   field = "image"
 ) => {
   try {
-    console.log("hello");
     const items = await model.find({ [findBy]: filterBy });
-    console.log(items);
     const itemImages = items.reduce((acc, item) => {
       const images = Array.isArray(item[field]) ? item[field] : [item[field]];
       return acc.concat(images);

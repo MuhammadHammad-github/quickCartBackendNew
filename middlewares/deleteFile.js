@@ -16,9 +16,7 @@ const deleteFile = (Model) => {
       if (!item) {
         return res.status(404).json({ message: "item not found" });
       }
-      console.log(item);
       const filePaths = Array.isArray(item.images) ? item.images : item.image;
-      console.log(filePaths);
       if (!filePaths) {
         return res
           .status(400)

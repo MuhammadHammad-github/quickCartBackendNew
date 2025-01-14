@@ -25,7 +25,6 @@ const createSubCategory = async (req, res) => {
       SubCategory,
       false
     );
-    console.log(subCategory, "this is sub category");
     if (!subCategory)
       return response(res, 400, { message: "Fail to create sub category" });
     const resp = await pushUpdate(
@@ -53,7 +52,6 @@ const getSubCategoriesByCategory = async (req, res) => {
   await readBy(res, { parentCategory: req.headers["id"] }, SubCategory);
 };
 const updateSubCategory = async (req, res) => {
-  console.log("body", req.body);
   const fullUrl = req.protocol + "://" + req.get("host");
   let query;
   if (req.file) {
